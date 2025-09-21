@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gyaanपथ - Modern Landing Page</title>
+  
+  <!-- FONT FIX: Added the missing link to import the 'Poppins' font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* This new rule enables smooth scrolling for the whole page */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #0d0d0d;
+      color: #fff;
+    }
+    
+    body.hindi-lang {
+        font-family: 'Noto Sans Devanagari', sans-serif;
+    }
+    
+    body.hindi-lang .logo,
+    body.hindi-lang .cta,
+    body.hindi-lang .hero-btn,
+    body.hindi-lang .step-card h3,
+    body.hindi-lang .testimonial-author h4,
+    body.hindi-lang .section-title,
+    body.hindi-lang nav ul li a,
+    body.hindi-lang .footer-links a {
+        font-family: 'Noto Sans Devanagari', sans-serif;
+    }
+
+
+    /* Header */
+    header {
+      width: 100%;
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      /* Updated gradient to match the hero section */
+      background: linear-gradient(-45deg, #007bff, #d45acc, #6a11cb, #b825fc);
+      background-size: 400% 400%;
+      animation: unifiedGradientAnimation 15s ease infinite;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    /* Unified animation for header and hero */
+    @keyframes unifiedGradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Logo */
+    .logo {
+      display: flex;
+      align-items: baseline; 
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .logo .hindi {
+      font-family: 'Noto Sans Devanagari', sans-serif;
+      font-weight: 700;
+      /* Negative margin to make it look like one word */
+      margin-left: -4px; 
+      color: #ffd54f;
+    }
+
+
+    /* Navigation */
+    nav ul {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    nav ul li a::after {
+      content: "";
+      position: absolute;
+      width: 0%;
+      height: 2px;
+      bottom: -4px;
+      left: 0;
+      background: #00e0ff;
+      transition: width 0.3s ease;
+    }
+    nav ul li a:hover::after {
+      width: 100%;
+    }
+
+    /* CTA Button */
+    .cta {
+      background: #fff;
+      padding: 0.6rem 1.4rem;
+      border: none;
+      border-radius: 25px;
+      color: #007bff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    .cta:hover {
+      background: #b32ccb;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    /* Language Dropdown */
+    .lang-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .lang-dropbtn {
+        background: transparent;
+        border: 2px solid #fff;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .lang-dropbtn .fa-chevron-down {
+        font-size: 0.8rem;
+        transition: transform 0.3s ease;
+    }
+
+    .lang-dropdown.active .lang-dropbtn .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+
+    .lang-dropbtn:hover {
+        background: #fff;
+        color: #6a11cb;
+    }
+
+    .lang-dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #fff;
+        min-width: 120px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        border-radius: 10px;
+        overflow: hidden;
+        right: 0;
+        margin-top: 8px;
+    }
+
+    .lang-dropdown-content a {
+        color: #333;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        font-family: 'Poppins', sans-serif;
+    }
+    body.hindi-lang .lang-dropdown-content a {
+        font-family: 'Noto Sans Devanagari', sans-serif;
+    }
+
+    .lang-dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+
+    .lang-dropdown.active .lang-dropdown-content {
+        display: block;
+    }
+
+    /* Mobile Menu */
+    .menu-toggle {
+      display: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    @media (max-width: 992px) {
+        .testimonials-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .hero-container {
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .hero-image {
+            margin-top: 2rem;
+        }
+        .hero-text {
+            text-align: center;
+        }
+    }
+
+
+    @media (max-width: 768px) {
+      nav, .header-actions {
+        display: none;
+      }
+      .menu-toggle {
+        display: block;
+      }
+      
+      .hero h1 {
+          font-size: 2.5rem; /* Adjust heading size for mobile */
+      }
+
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: left; /* Align text to the left */
+      background: linear-gradient(-45deg, #007bff, #d45acc, #6a11cb, #b825fc);
+      background-size: 400% 400%;
+      animation: unifiedGradientAnimation 15s ease infinite;
+      overflow: hidden;
+      padding: 2rem;
+    }
+
+    .hero-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1200px;
+        gap: 2rem; /* Reduced gap to accommodate larger image */
+    }
+
+    .hero-text {
+        flex: 0.9; /* Adjusted flex-basis */
+        z-index: 10;
+    }
+
+    .hero-image {
+        flex: 1.1; /* Adjusted flex-basis */
+        z-index: 5;
+        animation: imageFloat 6s ease-in-out infinite;
+    }
+    .hero-image img {
+        width: 100%;
+        max-width: 650px; /* Significantly increased image size */
+    }
+
+    @keyframes imageFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    /* Hero Logo - Animation Removed */
+    .hero-logo {
+      display: block;
+      height: 100px; /* Adjusted size */
+      width: auto;
+      margin: 0 0 1.5rem 0; /* Align to left */
+      filter: drop-shadow(0 0 15px rgba(225, 0, 255, 0.6));
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem; /* Larger heading */
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 2.5rem; /* More space */
+    }
+
+    /* Redesigned Hero "Button" */
+    .hero-btn {
+      background: transparent;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none; /* Removes underline from 'a' tag */
+      display: inline-block; /* Allows padding and other properties for 'a' tag */
+    }
+
+    .hero-btn:hover {
+      transform: translateY(-3px);
+      background: #fff;
+      color: #6a11cb;
+    }
+
+    /* === ANIMATION RULES START === */
+    /* Keyframe Animations for Hero Section Text */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Animation Classes from HTML */
+    .fade-up {
+      opacity: 0; /* Start hidden */
+      animation: slideInUp 0.8s ease-out 0.5s forwards;
+    }
+
+    .fade-up.delay {
+      animation-delay: 0.8s; /* Staggered delay for paragraph */
+    }
+
+    .fade-up.delay2 {
+      animation-delay: 1.1s; /* Staggered delay for button */
+    }
+    /* === ANIMATION RULES END === */
+
+
+    /* === NEW TECH BUBBLE ELEMENTS START === */
+    .tech-bubble {
+        position: absolute;
+        bottom: -100px; /* Start from below the screen */
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(127, 0, 255, 0.2) 100%);
+        border-radius: 50%;
+        animation: bubbleFloat 20s linear infinite;
+        z-index: 1;
+    }
+
+    @keyframes bubbleFloat {
+        from {
+            transform: translateY(0) scale(1);
+            opacity: 0.5;
+        }
+        to {
+            transform: translateY(-120vh) scale(0.8);
+            opacity: 0;
+        }
+    }
+    /* Individual bubble properties for variation */
+    .bubble1 { width: 80px; height: 80px; left: 10%; animation-duration: 25s; animation-delay: 0s; }
+    .bubble2 { width: 40px; height: 40px; left: 20%; animation-duration: 18s; animation-delay: 3s; }
+    .bubble3 { width: 100px; height: 100px; left: 35%; animation-duration: 30s; animation-delay: 7s; }
+    .bubble4 { width: 60px; height: 60px; left: 55%; animation-duration: 22s; animation-delay: 5s; }
+    .bubble5 { width: 90px; height: 90px; left: 75%; animation-duration: 28s; animation-delay: 1s; }
+    .bubble6 { width: 50px; height: 50px; left: 90%; animation-duration: 15s; animation-delay: 4s; }
+    /* === NEW TECH BUBBLE ELEMENTS END === */
+
+
+    /* Section placeholders */
+    section:not(.hero) { /* Apply to all sections except hero */
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+
+    /* ============================= */
+    /* How It Works Section - Modern */
+    /* ============================= */
+    .how-it-works {
+      position: relative;
+      padding: 6rem 2rem;
+      background: linear-gradient(-45deg, #007bff, #d45acc, #6a11cb, #b825fc);
+      background-size: 400% 400%;
+      animation: unifiedGradientAnimation 15s ease infinite;
+      color: #fff;
+      text-align: center;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .steps-container {
+      max-width: 1100px;
+      margin: auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-bottom: 3rem;
+      font-weight: 400;
+    }
+
+    /* Steps Grid */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .step-card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 18px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      color: #fff;
+      backdrop-filter: blur(6px);
+    }
+
+    .step-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    }
+
+    /* Step Number */
+    .step-number {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #7f00ff, #e100ff);
+      background-size: 200% 200%;
+      animation: numberGradient 6s ease infinite;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.5rem 1.3rem;
+      border-radius: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    }
+
+    @keyframes numberGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Icons */
+    .step-icon {
+      font-size: 2.3rem;
+      margin: 1.5rem 0 1rem;
+      color: #fff;
+    }
+
+    .step-card h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.7rem;
+    }
+
+    .step-card p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      opacity: 0.85;
+    }
+
+    /* Floating Elements - Circles */
+    .floating { position: absolute; border-radius: 50%; opacity: 0.35; background: rgba(255, 255, 255, 0.4); z-index: 1; animation: floatAnim 12s ease-in-out infinite; }
+    .floating-1 { width: 120px; height: 120px; top: 12%; left: 6%; }
+    .floating-2 { width: 90px; height: 90px; bottom: 15%; right: 10%; animation-delay: 3s; }
+    .floating-3 { width: 140px; height: 140px; top: 48%; right: 22%; animation-delay: 6s; }
+    .floating-icon { position: absolute; font-size: 3rem; opacity: 0.6; color: #fff; z-index: 1; animation: floatAnim 14s ease-in-out infinite; filter: drop-shadow(0 0 10px rgba(0,0,0,0.4)); }
+    .floating-book { top: 25%; left: 15%; animation-delay: 2s; }
+    .floating-pencil { bottom: 22%; left: 12%; animation-delay: 4s; }
+    .floating-graduation { top: 10%; right: 18%; animation-delay: 6s; }
+    .floating-lightbulb { bottom: 30%; right: 25%; animation-delay: 8s; }
+    @keyframes floatAnim { 0% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-25px) translateX(20px); } 100% { transform: translateY(0) translateX(0); } }
+
+    /* Testimonials / Team Section */
+    .testimonials {
+      position: relative;
+      padding: 6rem 2rem;
+      background: linear-gradient(-45deg, #007bff, #d45acc, #6a11cb, #b825fc);
+      background-size: 400% 400%;
+      animation: unifiedGradientAnimation 15s ease infinite;
+      color: #fff;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .testimonials-container {
+      max-width: 1100px;
+      margin: auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    .testimonial-card { background: rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 2rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.35); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .testimonial-card:hover { transform: translateY(-8px); box-shadow: 0 12px 30px rgba(0,0,0,0.45); }
+    .testimonial-author { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .testimonial-author img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; margin-bottom: 0.5rem; }
+    .testimonial-author h4 { margin: 0; font-size: 1.2rem; font-weight: 600; }
+    .testimonial-author span { font-size: 0.9rem; opacity: 0.85; }
+
+    /* Footer */
+    .footer { position: relative; color: #fff; text-align: center; background-color: #0d0d0d; overflow: hidden; padding-top: 4rem; padding-bottom: 2rem; }
+    .footer::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(45deg, rgba(155,77,255,0.15) 25%, transparent 25%), linear-gradient(-45deg, rgba(155,77,255,0.15) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(155,77,255,0.15) 75%), linear-gradient(-45deg, transparent 75%, rgba(155,77,255,0.15) 75%); background-size: 50px 50px; animation: squareAnim 12s linear infinite; z-index: 1; opacity: 0.6; }
+    @keyframes squareAnim { 0% { background-position: 0 0, 0 0, 0 0, 0 0; } 100% { background-position: 50px 50px, 50px 0, 0 50px, -50px 0; } }
+    .footer-wave { position: absolute; top: -1px; left: 0; width: 100%; height: 120px; overflow: hidden; line-height: 0; z-index: 2; }
+    .footer-wave svg { position: relative; display: block; width: calc(130% + 1.3px); height: 120px; animation: waveMove 8s linear infinite alternate; }
+    @keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
+    .footer-container { position: relative; z-index: 3; max-width: 1100px; margin: auto; padding: 2rem; }
+    .footer-logo img { height: 50px; margin-bottom: 1rem; }
+    .footer-logo p { font-size: 0.95rem; opacity: 0.85; }
+    .footer-links { margin: 2rem 0; }
+    .footer-links a { margin: 0 1rem; color: #fff; text-decoration: none; font-weight: 500; transition: color 0.3s; }
+    .footer-links a:hover { color: #9b4dff; }
+    .footer-social a { margin: 0 0.5rem; color: #fff; font-size: 1.2rem; transition: transform 0.3s, color 0.3s; }
+    .footer-social a:hover { color: #9b4dff; transform: translateY(-3px); }
+    .footer-copy { margin-top: 2rem; font-size: 0.85rem; opacity: 0.75; }
+  </style>
+</head>
+<body>
+  
+  <header>
+    <div class="nav-container">
+      <div class="logo">
+        Gyaan<span class="hindi">पथ</span>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#home" data-lang-key="home">Home</a></li>
+          <li><a href="#features" data-lang-key="features">Features</a></li>
+          <li><a href="#about" data-lang-key="about_us">About Us</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+          <a href="/login.html" class="cta" data-lang-key="login_signup">Login/Sign Up</a>
+          <div class="lang-dropdown">
+            <button class="lang-dropbtn">
+                <span id="current-lang-text">EN</span> <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="lang-dropdown-content">
+                <a href="#" data-lang="en">English</a>
+                <a href="#" data-lang="hi">हिन्दी</a>
+            </div>
+          </div>
+      </div>
+      <div class="menu-toggle">☰</div>
+    </div>
+  </header>
+  
+  <section id="home" class="hero">
+    <div class="tech-bubble bubble1"></div>
+    <div class="tech-bubble bubble2"></div>
+    <div class="tech-bubble bubble3"></div>
+    <div class="tech-bubble bubble4"></div>
+    <div class="tech-bubble bubble5"></div>
+    <div class="tech-bubble bubble6"></div>
+    <div class="hero-container">
+      <div class="hero-text">
+        <img src="assets/logo.png" alt="Gyaanपथ Logo" class="hero-logo">
+        <h1 class="fade-up" data-lang-key="welcome_message">Welcome to Gyaan<span class="hindi">पथ</span></h1>
+        <p class="fade-up delay" data-lang-key="hero_subtitle">
+          Empowering interactive learning, collaboration, and growth through modern digital tools.
+        </p>
+       <a href="#features" class="hero-btn fade-up delay2" data-lang-key="explore_btn">Explore Gyaanपथ</a>
+      </div>
+      <div class="hero-image">
+        <img src="assets/icon.png" alt="Gyaanपथ App Mockup">
+      </div>
+    </div>
+  </section>
+  
+  <section id="features" class="how-it-works">
+    <div class="floating floating-1"></div>
+    <div class="floating floating-2"></div>
+    <div class="floating floating-3"></div>
+    <div class="floating-icon floating-book">📚</div>
+    <div class="floating-icon floating-pencil">✏️</div>
+    <div class="floating-icon floating-graduation">🎓</div>
+    <div class="floating-icon floating-lightbulb">💡</div>
+    <div class="steps-container">
+      <h2 class="section-title" data-lang-key="how_it_works_title">How It Works</h2>
+      <p class="section-subtitle" data-lang-key="how_it_works_subtitle">Get started in just a few simple steps.</p>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-icon">📝</div>
+          <h3 data-lang-key="step1_title">Create</h3>
+          <p data-lang-key="step1_desc">Sign up and create your first interactive session in seconds.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-icon">🔗</div>
+          <h3 data-lang-key="step2_title">Share</h3>
+          <p data-lang-key="step2_desc">Invite learners by sharing a simple link or access code.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-icon">⚡</div>
+          <h3 data-lang-key="step3_title">Engage</h3>
+          <p data-lang-key="step3_desc">Participants join instantly and interact in real time.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <div class="step-icon">📚</div>
+          <h3 data-lang-key="step4_title">Learning</h3>
+          <p data-lang-key="step4_desc">Learning through modern tools made fun and easy.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="testimonials">
+    <div class="floating floating-1"></div>
+    <div class="floating floating-2"></div>
+    <div class="floating floating-3"></div>
+    <div class="testimonials-container">
+      <h2 class="section-title" data-lang-key="team_title">Meet Our Team</h2>
+      <p class="section-subtitle" data-lang-key="team_subtitle">The passionate minds behind Gyaanpath.</p>
+      <div class="testimonials-grid">
+        <div class="testimonial-card"> <div class="testimonial-author"> <img src="assets/vaibhav.png" alt="Team Member 1"> <h4>Vaibhav Mishra</h4> </div> </div>
+        <div class="testimonial-card"> <div class="testimonial-author"> <img src="assets/swapnil.jpg" alt="Team Member 2"> <h4>Swapnil Bam</h4> </div> </div>
+        <div class="testimonial-card"> <div class="testimonial-author"> <img src="assets/gulshan.jpg" alt="Team Member 3"> <h4>Gulshan Yadav</h4> </div> </div>
+        <div class="testimonial-card"> <div class="testimonial-author"> <img src="assets/Sheetal.jpg" alt="Team Member 4"> <h4>Sheetal Kushwah</h4> </div> </div>
+        <div class="testimonial-card"> <div class="testimonial-author"> <img src="assets/shivaniso.jpg" alt="Team Member 5"> <h4>Shivani Soni</h4> </div> </div>
+        <div class="testimonial-card"> <div class="testimonial-author"> <img src="assets/shivanija.jpg" alt="Team Member 6"> <h4>Shivani Jain</h4> </div> </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact" class="footer">
+    <div class="footer-wave">
+      <svg viewBox="0 0 1200 200" preserveAspectRatio="none">
+        <path d="M0,100 C300,200 900,0 1200,100 L1200,0 L0,0 Z" fill="#6a11cb"></path>
+        <path d="M0,120 C300,220 900,20 1200,120 L1200,0 L0,0 Z" fill="#9b4dff" opacity="0.8"></path>
+        <path d="M0,140 C300,240 900,40 1200,140 L1200,0 L0,0 Z" fill="#7f00ff" opacity="0.6"></path>
+      </svg>
+    </div>
+    <div class="footer-container">
+      <div class="footer-logo">
+        <img src="assets/log.png" alt="Gyaanpath Logo">
+        <p data-lang-key="footer_subtitle">Interactive learning made simple.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#home" data-lang-key="footer_home">Home</a>
+        <a href="#features" data-lang-key="footer_features">Features</a>
+        <a href="#about" data-lang-key="footer_team">Our Team</a>
+      </div>
+      <div class="footer-social">
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const translations = {
+        en: {
+            home: "Home",
+            features: "Features",
+            about_us: "About Us",
+            login_signup: "Login/Sign Up",
+            welcome_message: `Welcome to Gyaan<span class="hindi">पथ</span>`,
+            hero_subtitle: "Empowering interactive learning, collaboration, and growth through modern digital tools.",
+            explore_btn: "Explore Gyaanपथ",
+            how_it_works_title: "How It Works",
+            how_it_works_subtitle: "Get started in just a few simple steps.",
+            step1_title: "Create",
+            step1_desc: "Sign up and create your first interactive session in seconds.",
+            step2_title: "Share",
+            step2_desc: "Invite learners by sharing a simple link or access code.",
+            step3_title: "Engage",
+            step3_desc: "Participants join instantly and interact in real time.",
+            step4_title: "Learning",
+            step4_desc: "Learning through modern tools made fun and easy.",
+            team_title: "Meet Our Team",
+            team_subtitle: "The passionate minds behind Gyaanpath.",
+            footer_subtitle: "Interactive learning made simple.",
+            footer_home: "Home",
+            footer_features: "Features",
+            footer_team: "Our Team",
+        },
+        hi: {
+            home: "होम",
+            features: "विशेषताएँ",
+            about_us: "हमारे बारे में",
+            login_signup: "लॉगिन/साइन अप",
+            welcome_message: `ज्ञान<span class="hindi">पथ</span> में आपका स्वागत है`,
+            hero_subtitle: "आधुनिक डिजिटल उपकरणों के माध्यम से इंटरैक्टिव शिक्षण, सहयोग और विकास को सशक्त बनाना।",
+            explore_btn: "ज्ञानपथ का अन्वेषण करें",
+            how_it_works_title: "यह कैसे काम करता है",
+            how_it_works_subtitle: "बस कुछ सरल चरणों में आरंभ करें।",
+            step1_title: "बनाएं",
+            step1_desc: "साइन अप करें और सेकंडों में अपना पहला इंटरैक्टिव सत्र बनाएं।",
+            step2_title: "साझा करें",
+            step2_desc: "एक सरल लिंक या एक्सेस कोड साझा करके शिक्षार्थियों को आमंत्रित करें।",
+            step3_title: "जुड़ें",
+            step3_desc: "प्रतिभागी तुरंत जुड़ते हैं और वास्तविक समय में बातचीत करते हैं।",
+            step4_title: "सीखना",
+            step4_desc: "आधुनिक उपकरणों के माध्यम से सीखना मजेदार और आसान हो गया।",
+            team_title: "हमारी टीम से मिलें",
+            team_subtitle: "ज्ञानपथ के पीछे के जुनूनी दिमाग।",
+            footer_subtitle: "इंटरैक्टिव सीखना आसान हो गया।",
+            footer_home: "होम",
+            footer_features: "विशेषताएँ",
+            footer_team: "हमारी टीम",
+        }
+    };
+
+    const langDropdown = document.querySelector('.lang-dropdown');
+    const dropdownButton = langDropdown.querySelector('.lang-dropbtn');
+    const dropdownLinks = document.querySelectorAll('.lang-dropdown-content a');
+    const currentLangText = document.getElementById('current-lang-text');
+    let currentLang = 'en';
+
+    function setLanguage(lang) {
+        document.body.classList.toggle('hindi-lang', lang === 'hi');
+        const elements = document.querySelectorAll('[data-lang-key]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (translations[lang][key]) {
+                 // Use innerHTML to correctly render the span tag in the welcome message
+                el.innerHTML = translations[lang][key];
+            }
+        });
+        currentLang = lang;
+        currentLangText.textContent = lang === 'en' ? 'EN' : 'HI';
+        langDropdown.classList.remove('active'); // Close dropdown after selection
+    }
+
+    dropdownButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevents the window click event from firing immediately
+        langDropdown.classList.toggle('active');
+    });
+
+    window.addEventListener('click', (e) => {
+        if (!langDropdown.contains(e.target)) {
+            langDropdown.classList.remove('active');
+        }
+    });
+
+
+    dropdownLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newLang = link.getAttribute('data-lang');
+            if (newLang !== currentLang) {
+                setLanguage(newLang);
+            }
+        });
+    });
+
+    // Initial load
+    setLanguage('en');
+
+  </script>
+</body>
+</html>
+
