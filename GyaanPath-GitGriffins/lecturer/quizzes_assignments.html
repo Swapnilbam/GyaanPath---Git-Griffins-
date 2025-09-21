@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzes & Assignments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #4a00e0; 
+            background-image: linear-gradient(to bottom right, #8e2de2, #4a00e0);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #ffffff;
+        }
+        body.hindi-lang { font-family: 'Noto Sans Devanagari', sans-serif; }
+        .font-title-pro { font-family: 'Montserrat', sans-serif; }
+        body.hindi-lang .font-title-pro { font-family: 'Noto Sans Devanagari', sans-serif; font-weight: 700; }
+        .item-card { background-color: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease; }
+        .item-card:hover { transform: translateY(-4px); background-color: rgba(255, 255, 255, 0.15); }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+        .empty-state { transition: opacity 0.5s ease; }
+        .question-block { font-size: 1.125rem; font-weight: 600; color: #1f2937; margin-bottom: 1rem; padding: 1rem; background-color: #ffffff; border-radius: 0.5rem; transition: all 0.2s ease-in-out; border-left: 4px solid #8e2de2; }
+        .option-block { padding: 0.75rem 1rem; background-color: #ffffff; border-radius: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #e5e7eb; transition: all 0.2s ease-in-out; cursor: pointer; color: #374151; }
+        .question-block:hover, .option-block:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(0,0,0,0.08); z-index: 10; position: relative; }
+        .calendar { background-color: #2d3748; border-radius: 0.5rem; padding: 1rem; color: white; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center; }
+        .calendar-day { padding: 0.5rem; border-radius: 50%; cursor: pointer; transition: background-color 0.2s; }
+        .calendar-day:hover { background-color: #4a5568; }
+        .calendar-day.today { background-color: #718096; }
+        .calendar-day.selected { background-color: #8e2de2; }
+        .calendar-day.empty { cursor: default; }
+        .calendar-day.empty:hover { background-color: transparent; }
+        .background-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
+        .particle { position: absolute; background-color: rgba(255, 255, 255, 0.3); border-radius: 50%; animation: float 25s infinite ease-in-out; }
+        @keyframes float { 0% { transform: translateY(0) translateX(0); opacity: 0; } 25% { opacity: 1; } 50% { transform: translateY(-100vh) translateX(50vw); } 75% { opacity: 1; } 100% { transform: translateY(0) translateX(0); opacity: 0; } }
+        /* Language Dropdown */
+        .lang-dropdown { position: relative; display: inline-block; }
+        .lang-dropbtn { background: transparent; border: 1px solid rgba(255, 255, 255, 0.5); color: #fff; padding: 0.4rem 0.8rem; border-radius: 15px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; }
+        .lang-dropbtn:hover { background: rgba(255, 255, 255, 0.2); }
+        .lang-dropbtn .fa-chevron-down { font-size: 0.7rem; transition: transform 0.3s ease; }
+        .lang-dropdown.active .lang-dropbtn .fa-chevron-down { transform: rotate(180deg); }
+        .lang-dropdown-content { display: none; position: absolute; background-color: rgba(20, 20, 30, 0.9); backdrop-filter: blur(5px); min-width: 110px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 50; border-radius: 10px; overflow: hidden; right: 0; margin-top: 8px; }
+        .lang-dropdown-content a { color: #fff; padding: 10px 14px; text-decoration: none; display: block; font-size: 0.9rem; transition: background-color 0.2s; }
+        body.hindi-lang .lang-dropdown-content a { font-family: 'Noto Sans Devanagari', sans-serif; }
+        .lang-dropdown-content a:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .lang-dropdown.active .lang-dropdown-content { display: block; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="background-wrapper">
+        <script>
+            const bg = document.querySelector('.background-wrapper');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 8 + 2;
+                particle.style.width = `${size}px`; particle.style.height = `${size}px`;
+                particle.style.bottom = `-${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${Math.random() * 30 + 20}s`;
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                bg.appendChild(particle);
+            }
+        </script>
+    </div>
+    <!-- All Modals -->
+    <div id="quiz-details-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden modal-overlay opacity-0">
+        <div class="bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg modal-content transform scale-95 opacity-0">
+             <div class="p-6">
+                <h2 class="text-2xl font-bold text-white mb-4" data-lang-key="quiz_details_title">Quiz Details</h2>
+                <form id="save-quiz-form" class="space-y-4">
+                    <div><label for="quiz-name" class="block text-sm font-medium text-gray-300 mb-2" data-lang-key="quiz_name_label">Quiz Name</label><input type="text" id="quiz-name" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3" required></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label for="quiz-marks" class="block text-sm font-medium text-gray-300 mb-2" data-lang-key="total_marks_label">Total Marks</label><input type="number" id="quiz-marks" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3" required></div>
+                        <div><label for="quiz-time" class="block text-sm font-medium text-gray-300 mb-2" data-lang-key="total_time_label">Total Time (minutes)</label><input type="number" id="quiz-time" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3" required></div>
+                    </div>
+                    <div><label for="quiz-due-date" class="block text-sm font-medium text-gray-300 mb-2" data-lang-key="due_date_label">Due Date</label><input type="text" id="quiz-due-date" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3 cursor-pointer" readonly placeholder="Select a date" data-lang-placeholder-key="select_date_placeholder"><div id="calendar-container-quiz" class="mt-2 hidden"></div></div>
+                    <div class="pt-4 flex justify-end space-x-4"><button type="button" class="close-modal-btn px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-500" data-lang-key="cancel_btn">Cancel</button><button type="submit" class="px-6 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 font-semibold" data-lang-key="save_quiz_btn">Save Quiz</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+     <div id="assignment-details-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden modal-overlay opacity-0">
+        <div class="bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg modal-content transform scale-95 opacity-0">
+             <div class="p-6">
+                <h2 class="text-2xl font-bold text-white mb-4" data-lang-key="assignment_details_title">Assignment Details</h2>
+                <form id="save-assignment-form" class="space-y-4">
+                    <div><label for="assignment-name" class="block text-sm font-medium text-gray-300 mb-2" data-lang-key="assignment_name_label">Assignment Name</label><input type="text" id="assignment-name" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3" placeholder="e.g., Lab Report 1" data-lang-placeholder-key="assignment_name_placeholder" required></div>
+                    <div><label for="assignment-due-date" class="block text-sm font-medium text-gray-300 mb-2" data-lang-key="due_date_label">Due Date</label><input type="text" id="assignment-due-date" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3 cursor-pointer" readonly placeholder="Select a date" data-lang-placeholder-key="select_date_placeholder"><div id="calendar-container-assignment" class="mt-2 hidden"></div></div>
+                    <div class="pt-4 flex justify-end space-x-4"><button type="button" class="close-modal-btn px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-500" data-lang-key="cancel_btn">Cancel</button><button type="submit" class="px-6 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 font-semibold" data-lang-key="save_assignment_btn">Save Assignment</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="view-quiz-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden modal-overlay opacity-0"><div class="bg-slate-100 rounded-2xl shadow-xl w-full max-w-2xl modal-content transform scale-95 opacity-0 flex flex-col max-h-[90vh]"><div class="p-5 border-b border-gray-200 bg-gradient-to-r from-purple-500 to-pink-500 rounded-t-2xl"><div class="flex justify-between items-center"><h2 id="modal-quiz-title" class="text-2xl font-bold text-white">Quiz Title</h2><button class="close-modal-btn text-white/70 hover:text-white text-4xl leading-none">&times;</button></div></div><div id="modal-quiz-content" class="p-6 overflow-y-auto text-gray-700 text-base"></div></div></div>
+    <div id="view-assignment-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden modal-overlay opacity-0"><div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl modal-content transform scale-95 opacity-0 flex flex-col max-h-[90vh]"><div class="p-6 flex-grow overflow-y-auto"><div class="flex justify-between items-start"><div class="flex-grow pr-8"><h2 id="modal-assignment-title" class="text-3xl font-bold text-gray-800 mb-4"></h2><div id="modal-assignment-content" class="prose max-w-none text-gray-700"></div></div><div class="w-64 flex-shrink-0 bg-slate-100 rounded-xl p-4"><h3 class="font-bold text-gray-800 mb-2" data-lang-key="details_title">Details</h3><div class="space-y-2 text-sm text-gray-600"><p><strong data-lang-key="points_label">Points:</strong> <span id="modal-assignment-points"></span></p><p><strong data-lang-key="posted_label">Posted:</strong> <span id="modal-assignment-date"></span></p></div></div></div></div><div class="p-4 bg-slate-50 rounded-b-2xl text-right"><button class="close-modal-btn px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold" data-lang-key="close_btn">Close</button></div></div></div>
+    <div class="relative min-h-screen p-4 sm:p-6 lg:p-8">
+        <div class="w-full max-w-5xl mx-auto">
+            <header class="flex items-center justify-between mb-10">
+                <div><h1 class="font-title-pro text-4xl font-bold tracking-wide" data-lang-key="main_title">Quizzes & Assignments</h1><p class="mt-2 text-lg text-white/70" data-lang-key="main_subtitle">A list of all your saved materials.</p></div>
+                 <div class="flex items-center gap-4">
+                    <a href="lecturer_dashboard.html" class="px-5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-semibold transition-colors flex-shrink-0" data-lang-key="back_to_dashboard">&larr; Back to Dashboard</a>
+                    <div class="lang-dropdown">
+                        <button class="lang-dropbtn">
+                            <span id="current-lang-text">EN</span> <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="lang-dropdown-content">
+                            <a href="#" data-lang="en">English</a>
+                            <a href="#" data-lang="hi">हिन्दी</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <section id="quizzes-section" class="mb-12">
+                <h2 class="font-title-pro text-3xl font-bold mb-4" data-lang-key="quizzes_section_title">Quizzes</h2>
+                <div id="quiz-list-container" class="space-y-4"></div>
+                <div id="quiz-empty-state" class="hidden text-center py-16 px-6 bg-white/5 rounded-2xl empty-state opacity-0">
+                     <svg class="mx-auto h-24 w-24 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    <h3 class="mt-4 text-xl font-semibold text-white" data-lang-key="no_quizzes_title">No Quizzes Uploaded Yet</h3>
+                    <p class="mt-2 text-white/60" data-lang-key="no_quizzes_subtitle">Generate a quiz from the AI Assistant to see it here.</p>
+                </div>
+            </section>
+            <section id="assignments-section">
+                <h2 class="font-title-pro text-3xl font-bold mb-4" data-lang-key="assignments_section_title">Assignments</h2>
+                <div id="assignment-list-container" class="space-y-4"></div>
+                <div id="assignment-empty-state" class="hidden text-center py-16 px-6 bg-white/5 rounded-2xl empty-state opacity-0">
+                    <svg class="mx-auto h-24 w-24 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                    <h3 class="mt-4 text-xl font-semibold text-white" data-lang-key="no_assignments_title">No Assignments Uploaded Yet</h3>
+                    <p class="mt-2 text-white/60" data-lang-key="no_assignments_subtitle">Generate an assignment from the AI Assistant to see it here.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const translations = {
+                en: {
+                    doc_title: "Quizzes & Assignments",
+                    main_title: "Quizzes & Assignments",
+                    main_subtitle: "A list of all your saved materials.",
+                    back_to_dashboard: "← Back to Dashboard",
+                    quizzes_section_title: "Quizzes",
+                    no_quizzes_title: "No Quizzes Uploaded Yet",
+                    no_quizzes_subtitle: "Generate a quiz from the AI Assistant to see it here.",
+                    assignments_section_title: "Assignments",
+                    no_assignments_title: "No Assignments Uploaded Yet",
+                    no_assignments_subtitle: "Generate an assignment from the AI Assistant to see it here.",
+                    quiz_details_title: "Quiz Details",
+                    quiz_name_label: "Quiz Name",
+                    total_marks_label: "Total Marks",
+                    total_time_label: "Total Time (minutes)",
+                    due_date_label: "Due Date",
+                    select_date_placeholder: "Select a date",
+                    cancel_btn: "Cancel",
+                    save_quiz_btn: "Save Quiz",
+                    assignment_details_title: "Assignment Details",
+                    assignment_name_label: "Assignment Name",
+                    assignment_name_placeholder: "e.g., Lab Report 1",
+                    save_assignment_btn: "Save Assignment",
+                    details_title: "Details",
+                    points_label: "Points:",
+                    posted_label: "Posted:",
+                    close_btn: "Close",
+                    saved_on: "Saved on",
+                    at: "at",
+                    view_btn: "View",
+                    delete_btn: "Delete",
+                    confirm_delete: "Are you sure you want to delete",
+                    calendar_days: "Sun Mon Tue Wed Thu Fri Sat",
+                    calendar_months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+                },
+                hi: {
+                    doc_title: "क्विज़ और असाइनमेंट",
+                    main_title: "क्विज़ और असाइनमेंट",
+                    main_subtitle: "आपकी सभी सहेजी गई सामग्रियों की एक सूची।",
+                    back_to_dashboard: "← डैशबोर्ड पर वापस जाएं",
+                    quizzes_section_title: "क्विज़",
+                    no_quizzes_title: "अभी तक कोई क्विज़ अपलोड नहीं किया गया है",
+                    no_quizzes_subtitle: "इसे यहां देखने के लिए एआई सहायक से एक क्विज़ बनाएं।",
+                    assignments_section_title: "असाइनमेंट",
+                    no_assignments_title: "अभी तक कोई असाइनमेंट अपलोड नहीं किया गया है",
+                    no_assignments_subtitle: "इसे यहां देखने के लिए एआई सहायक से एक असाइनमेंट बनाएं।",
+                    quiz_details_title: "क्विज़ विवरण",
+                    quiz_name_label: "क्विज़ का नाम",
+                    total_marks_label: "कुल अंक",
+                    total_time_label: "कुल समय (मिनट)",
+                    due_date_label: "देय तिथि",
+                    select_date_placeholder: "एक तारीख चुनें",
+                    cancel_btn: "रद्द करें",
+                    save_quiz_btn: "क्विज़ सहेजें",
+                    assignment_details_title: "असाइनमेंट विवरण",
+                    assignment_name_label: "असाइनमेंट का नाम",
+                    assignment_name_placeholder: "जैसे, लैब रिपोर्ट 1",
+                    save_assignment_btn: "असाइनमेंट सहेजें",
+                    details_title: "विवरण",
+                    points_label: "अंक:",
+                    posted_label: "पोस्ट किया गया:",
+                    close_btn: "बंद करें",
+                    saved_on: "को सहेजा गया",
+                    at: "बजे",
+                    view_btn: "देखें",
+                    delete_btn: "हटाएं",
+                    confirm_delete: "क्या आप वाकई हटाना चाहते हैं",
+                    calendar_days: "रवि सोम मंगल बुध गुरु शुक्र शनि",
+                    calendar_months: ["जनवरी", "फरवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"]
+                }
+            };
+            
+            localStorage.setItem('assignmentSubmissionCount', '0');
+            let currentLang = 'en';
+            const modals = { quizDetails: document.getElementById('quiz-details-modal'), assignmentDetails: document.getElementById('assignment-details-modal'), viewQuiz: document.getElementById('view-quiz-modal'), viewAssignment: document.getElementById('view-assignment-modal'), };
+            const quizListContainer = document.getElementById('quiz-list-container');
+            const assignmentListContainer = document.getElementById('assignment-list-container');
+            const quizEmptyState = document.getElementById('quiz-empty-state');
+            const assignmentEmptyState = document.getElementById('assignment-empty-state');
+            const saveQuizForm = document.getElementById('save-quiz-form');
+            const saveAssignmentForm = document.getElementById('save-assignment-form');
+            const quizDueDateInput = document.getElementById('quiz-due-date');
+            const assignmentDueDateInput = document.getElementById('assignment-due-date');
+            const calendarContainerQuiz = document.getElementById('calendar-container-quiz');
+            const calendarContainerAssignment = document.getElementById('calendar-container-assignment');
+            let savedQuizzes = JSON.parse(localStorage.getItem('savedQuizzes')) || [];
+            let savedAssignments = JSON.parse(localStorage.getItem('savedAssignments')) || [];
+            let currentDate = new Date();
+
+            const langDropdown = document.querySelector('.lang-dropdown');
+            const dropdownButton = langDropdown.querySelector('.lang-dropbtn');
+            const dropdownLinks = document.querySelectorAll('.lang-dropdown-content a');
+            const currentLangText = document.getElementById('current-lang-text');
+
+            function setLanguage(lang) {
+                currentLang = lang;
+                localStorage.setItem('gyaanpath_lang', lang);
+                document.body.classList.toggle('hindi-lang', lang === 'hi');
+                document.title = translations[lang].doc_title;
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) el.textContent = translations[lang][key];
+                });
+                document.querySelectorAll('[data-lang-placeholder-key]').forEach(el => {
+                    const key = el.dataset.langPlaceholderKey;
+                    if (translations[lang][key]) el.placeholder = translations[lang][key];
+                });
+                currentLangText.textContent = lang === 'en' ? 'EN' : 'HI';
+                langDropdown.classList.remove('active');
+                renderItems('quiz');
+                renderItems('assignment');
+            }
+
+            dropdownButton.addEventListener('click', (e) => { e.stopPropagation(); langDropdown.classList.toggle('active'); });
+            window.addEventListener('click', (e) => { if (!langDropdown.contains(e.target)) langDropdown.classList.remove('active'); });
+            dropdownLinks.forEach(link => { link.addEventListener('click', (e) => { e.preventDefault(); setLanguage(link.getAttribute('data-lang')); }); });
+            
+            function openModal(modal) { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content')?.classList.remove('opacity-0', 'scale-95'); }, 10); }
+            function closeModal(modal) { if(!modal) return; modal.classList.add('opacity-0'); modal.querySelector('.modal-content')?.classList.add('opacity-0', 'scale-95'); setTimeout(() => modal.classList.add('hidden'), 300); }
+            document.querySelectorAll('.close-modal-btn').forEach(btn => btn.addEventListener('click', () => Object.values(modals).forEach(closeModal)));
+            
+            function renderCalendar(container, inputEl, year, month) {
+                container.innerHTML = '';
+                const monthName = translations[currentLang].calendar_months[month];
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const header = document.createElement('div');
+                header.className = 'calendar-header mb-4';
+                header.innerHTML = `<button type="button" id="prev-month" class="p-2">&lt;</button><span class="font-bold">${monthName} ${year}</span><button type="button" id="next-month" class="p-2">&gt;</button>`;
+                container.appendChild(header);
+                const grid = document.createElement('div');
+                grid.className = 'calendar-grid';
+                translations[currentLang].calendar_days.split(' ').forEach(day => { grid.innerHTML += `<div class="font-bold text-xs text-gray-400">${day}</div>`; });
+                for (let i = 0; i < firstDay; i++) grid.innerHTML += '<div class="empty"></div>';
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'calendar-day';
+                    dayEl.textContent = day;
+                    dayEl.dataset.date = new Date(year, month, day).toISOString().split('T')[0];
+                    if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) dayEl.classList.add('today');
+                    grid.appendChild(dayEl);
+                }
+                container.appendChild(grid);
+                container.querySelector('#prev-month').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(container, inputEl, currentDate.getFullYear(), currentDate.getMonth()); });
+                container.querySelector('#next-month').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(container, inputEl, currentDate.getFullYear(), currentDate.getMonth()); });
+                grid.addEventListener('click', e => { if (e.target.dataset.date) { inputEl.value = e.target.dataset.date; container.classList.add('hidden'); } });
+            }
+            quizDueDateInput.addEventListener('click', () => { calendarContainerQuiz.classList.toggle('hidden'); renderCalendar(calendarContainerQuiz, quizDueDateInput, currentDate.getFullYear(), currentDate.getMonth()); });
+            assignmentDueDateInput.addEventListener('click', () => { calendarContainerAssignment.classList.toggle('hidden'); renderCalendar(calendarContainerAssignment, assignmentDueDateInput, currentDate.getFullYear(), currentDate.getMonth()); });
+            
+            function renderItems(type) {
+                const container = type === 'quiz' ? quizListContainer : assignmentListContainer;
+                const emptyState = type === 'quiz' ? quizEmptyState : assignmentEmptyState;
+                const items = type === 'quiz' ? savedQuizzes : savedAssignments;
+                container.innerHTML = '';
+                if (items.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    setTimeout(() => emptyState.classList.remove('opacity-0'), 10);
+                } else {
+                    emptyState.classList.add('hidden', 'opacity-0');
+                    items.forEach((item, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'item-card rounded-2xl p-5 flex justify-between items-center';
+                        const date = new Date(item.date);
+                        const formattedDate = `${date.toLocaleDateString()} ${translations[currentLang].at} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                        card.innerHTML = `<div><h3 class="text-xl font-bold">${item.name}</h3><p class="text-sm text-white/60 mt-1">${translations[currentLang].saved_on} ${formattedDate}</p></div><div class="flex space-x-2"><button data-type="${type}" data-index="${index}" class="view-btn px-4 py-2 text-sm rounded-lg bg-sky-500 hover:bg-sky-400">${translations[currentLang].view_btn}</button><button data-type="${type}" data-index="${index}" class="delete-btn px-4 py-2 text-sm rounded-lg bg-red-600 hover:bg-red-500">${translations[currentLang].delete_btn}</button></div>`;
+                        container.appendChild(card);
+                    });
+                }
+            }
+            function handleView(type, index) {
+                const item = type === 'quiz' ? savedQuizzes[index] : savedAssignments[index];
+                const modal = type === 'quiz' ? modals.viewQuiz : modals.viewAssignment;
+                document.getElementById(`modal-${type}-title`).textContent = item.name;
+                const contentEl = document.getElementById(`modal-${type}-content`);
+                if (type === 'quiz') { contentEl.innerHTML = formatQuizContent(item.content); } 
+                else { contentEl.innerHTML = formatAssignmentContent(item.content); document.getElementById('modal-assignment-points').textContent = item.points || 'N/A'; document.getElementById('modal-assignment-date').textContent = new Date(item.date).toLocaleDateString(); }
+                openModal(modal);
+            }
+            function handleDelete(type, index) {
+                const items = type === 'quiz' ? savedQuizzes : savedAssignments;
+                if (confirm(`${translations[currentLang].confirm_delete} "${items[index].name}"?`)) {
+                    items.splice(index, 1);
+                    localStorage.setItem(type === 'quiz' ? 'savedQuizzes' : 'savedAssignments', JSON.stringify(items));
+                    renderItems(type);
+                }
+            }
+            quizListContainer.addEventListener('click', e => { if(e.target.classList.contains('view-btn')) handleView('quiz', e.target.dataset.index); if(e.target.classList.contains('delete-btn')) handleDelete('quiz', e.target.dataset.index); });
+            assignmentListContainer.addEventListener('click', e => { if(e.target.classList.contains('view-btn')) handleView('assignment', e.target.dataset.index); if(e.target.classList.contains('delete-btn')) handleDelete('assignment', e.target.dataset.index); });
+            saveQuizForm.addEventListener('submit', e => { e.preventDefault(); const newItem = { name: document.getElementById('quiz-name').value, content: decodeURIComponent(localStorage.getItem('pendingContent')), date: new Date().toISOString(), marks: document.getElementById('quiz-marks').value, time: document.getElementById('quiz-time').value, dueDate: quizDueDateInput.value, }; savedQuizzes.unshift(newItem); localStorage.setItem('savedQuizzes', JSON.stringify(savedQuizzes)); let count = parseInt(localStorage.getItem('newQuizAssignmentCount') || '0'); localStorage.setItem('newQuizAssignmentCount', ++count); renderItems('quiz'); localStorage.removeItem('pendingContent'); localStorage.removeItem('pendingContentType'); closeModal(modals.quizDetails); saveQuizForm.reset(); });
+            saveAssignmentForm.addEventListener('submit', e => { e.preventDefault(); const newItem = { name: document.getElementById('assignment-name').value, content: decodeURIComponent(localStorage.getItem('pendingContent')), date: new Date().toISOString(), dueDate: assignmentDueDateInput.value, }; savedAssignments.unshift(newItem); localStorage.setItem('savedAssignments', JSON.stringify(savedAssignments)); let count = parseInt(localStorage.getItem('newQuizAssignmentCount') || '0'); localStorage.setItem('newQuizAssignmentCount', ++count); renderItems('assignment'); localStorage.removeItem('pendingContent'); localStorage.removeItem('pendingContentType'); closeModal(modals.assignmentDetails); saveAssignmentForm.reset(); });
+            
+            window.addEventListener('load', () => {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('action') === 'saveContent') {
+                    const type = localStorage.getItem('pendingContentType');
+                    if (type === 'quiz') openModal(modals.quizDetails); 
+                    else if (type === 'assignment') openModal(modals.assignmentDetails);
+                }
+                const savedLang = localStorage.getItem('gyaanpath_lang') || 'en';
+                setLanguage(savedLang);
+            });
+
+            function formatQuizContent(text) { let cleanText = text.replace(/^(here is|sure, here's|certainly, here's).*?:?\s*\n*/im, '').replace(/\*\*(.*?)\*\*/g, '$1').replace(/^.*(quiz|questions).*\n/im, '').replace(/^-{2,}\n/gm, ''); const questions = cleanText.split(/\n(?=\d+\.)/).filter(q => q.trim() !== ''); let html = ''; questions.forEach(questionText => { const lines = questionText.split('\n').filter(line => line.trim() !== ''); if (lines.length > 0) { const question = lines.shift().replace(/^\d+\.\s*/, '').trim(); if (!question) return; html += `<div class="question-block">${question}</div>`; lines.forEach(optionLine => { const optionContent = optionLine.replace(/^[a-zA-Z][.)]\s*/, '').trim(); if(optionContent) html += `<div class="option-block">${optionContent}</div>`; }); html += '<hr class="my-8 border-slate-200">'; } }); return html.endsWith('<hr class="my-8 border-slate-200">') ? html.slice(0, -37) : html; }
+            function formatAssignmentContent(text) { let cleanText = text.replace(/^(here is|sure, here's|certainly, here's|here's).*?:?\s*\n*/im, ''); return cleanText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-lg text-gray-900">$1</strong>').replace(/\n/g, '<br><br>'); }
+        });
+    </script>
+</body>
+</html>
+
+
