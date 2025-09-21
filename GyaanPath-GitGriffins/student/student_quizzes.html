@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzes & Assignments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a0537; 
+            background-image: linear-gradient(to bottom right, #4a00e0, #1a0537);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #ffffff;
+        }
+        body.hindi-lang { font-family: 'Noto Sans Devanagari', sans-serif; }
+        .font-title-pro { font-family: 'Montserrat', sans-serif; }
+        body.hindi-lang .font-title-pro { font-family: 'Noto Sans Devanagari', sans-serif; font-weight: 700; }
+        .item-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .item-card:hover {
+            transform: translateY(-4px);
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+        .empty-state { transition: opacity 0.5s ease; }
+        
+        .quiz-option { border: 2px solid #e5e7eb; transition: all 0.2s ease-in-out; }
+        .quiz-option:hover { border-color: #8e2de2; background-color: #f3e8ff; }
+        .quiz-option.selected { border-color: #8e2de2; background-color: #a855f7; color: white; }
+        
+        .background-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
+        .particle { position: absolute; background-color: rgba(255, 255, 255, 0.3); border-radius: 50%; animation: float 25s infinite ease-in-out; }
+        @keyframes float { 0% { transform: translateY(0) translateX(0); opacity: 0; } 25% { opacity: 1; } 50% { transform: translateY(-100vh) translateX(50vw); } 75% { opacity: 1; } 100% { transform: translateY(0) translateX(0); opacity: 0; } }
+
+         /* Language Dropdown */
+        .lang-dropdown { position: relative; display: inline-block; }
+        .lang-dropbtn { background: transparent; border: 1px solid rgba(255, 255, 255, 0.5); color: #fff; padding: 0.4rem 0.8rem; border-radius: 15px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; }
+        .lang-dropbtn:hover { background: rgba(255, 255, 255, 0.2); }
+        .lang-dropbtn .fa-chevron-down { font-size: 0.7rem; transition: transform 0.3s ease; }
+        .lang-dropdown.active .lang-dropbtn .fa-chevron-down { transform: rotate(180deg); }
+        .lang-dropdown-content { display: none; position: absolute; background-color: rgba(20, 20, 30, 0.9); backdrop-filter: blur(5px); min-width: 110px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 50; border-radius: 10px; overflow: hidden; right: 0; margin-top: 8px; }
+        .lang-dropdown-content a { color: #fff; padding: 10px 14px; text-decoration: none; display: block; font-size: 0.9rem; transition: background-color 0.2s; }
+        body.hindi-lang .lang-dropdown-content a { font-family: 'Noto Sans Devanagari', sans-serif; }
+        .lang-dropdown-content a:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .lang-dropdown.active .lang-dropdown-content { display: block; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="background-wrapper">
+        <script>
+            const bg = document.querySelector('.background-wrapper');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 8 + 2;
+                particle.style.width = `${size}px`; particle.style.height = `${size}px`;
+                particle.style.bottom = `-${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${Math.random() * 30 + 20}s`;
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                bg.appendChild(particle);
+            }
+        </script>
+    </div>
+    <!-- Quiz Taker Modal -->
+    <div id="quiz-taker-modal" class="fixed inset-0 bg-slate-100 z-50 hidden modal-overlay opacity-0">
+        <div class="w-full h-full flex flex-col modal-content transform scale-95 opacity-0">
+            <div id="quiz-header" class="p-4 bg-white shadow-md flex justify-between items-center"><div class="w-24"></div><h2 id="modal-quiz-title" class="text-xl font-bold text-gray-800 text-center">Quiz Title</h2><div id="quiz-timer" class="w-24 text-right text-xl font-bold text-purple-600"></div></div>
+            <div id="quiz-body" class="flex-grow overflow-y-auto p-6 text-gray-800"></div>
+            <div id="quiz-footer" class="p-4 bg-white shadow-md flex justify-center items-center">
+                <div id="quiz-navigation" class="hidden w-full flex justify-between items-center">
+                    <button id="back-question-btn" class="px-6 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold" data-lang-key="back_btn">Back</button>
+                    <span id="quiz-progress" class="text-sm text-gray-500"></span>
+                    <button id="next-question-btn" class="px-6 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold" data-lang-key="next_btn">Next</button>
+                </div>
+                <button id="start-quiz-btn" class="px-8 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-lg" data-lang-key="start_quiz_btn">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+    <!-- View Assignment Modal -->
+    <div id="view-assignment-modal" class="fixed inset-0 bg-black/60 z-50 hidden modal-overlay opacity-0">
+        <div class="bg-slate-100 rounded-2xl shadow-xl w-full max-w-4xl modal-content transform scale-95 opacity-0 flex flex-col max-h-[90vh]">
+            <div class="p-4 sm:p-6 flex-grow overflow-y-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start">
+                    <div class="flex-grow md:pr-8">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-purple-500 rounded-full mr-4"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div>
+                            <h2 id="modal-assignment-title" class="text-3xl font-bold text-gray-800"></h2>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-2"><span data-lang-key="posted_on">Posted:</span> <span id="modal-assignment-date"></span></p>
+                        <p class="text-sm font-bold text-gray-700 mb-6"><span data-lang-key="points">Points:</span> <span id="modal-assignment-points"></span></p>
+                        <hr class="mb-6">
+                        <div id="modal-assignment-content" class="prose max-w-none text-gray-700"></div>
+                    </div>
+                    <div class="w-full md:w-72 flex-shrink-0 bg-white rounded-xl p-4 border mt-6 md:mt-0">
+                        <div class="flex justify-between items-center">
+                           <h3 class="font-bold text-gray-800" data-lang-key="your_work">Your work</h3>
+                           <span id="assignment-status-text" class="text-sm font-semibold text-gray-500" data-lang-key="status_assigned">Assigned</span>
+                        </div>
+                        <div id="file-upload-area" class="mt-4"></div>
+                        <button id="add-work-btn" class="w-full mt-4 flex items-center justify-center py-2 px-4 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition-colors">
+                           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                           <span data-lang-key="add_or_create">Add or create</span>
+                        </button>
+                        <input type="file" id="file-input" class="hidden"/>
+                        <button id="turn-in-btn" class="w-full mt-2 py-2 px-4 rounded-lg bg-gray-300 text-gray-500 font-semibold cursor-not-allowed" data-lang-key="mark_as_done" disabled>Mark as done</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-b-2xl text-right">
+                 <button class="close-modal-btn px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold" data-lang-key="close_btn">Close</button>
+            </div>
+        </div>
+    </div>
+    <!-- Main Content -->
+    <div class="relative min-h-screen p-4 sm:p-6 lg:p-8">
+        <div class="w-full max-w-5xl mx-auto">
+            <header class="flex items-center justify-between mb-10">
+                <div>
+                    <h1 class="font-title-pro text-4xl font-bold tracking-wide" data-lang-key="main_title">Quizzes & Assignments</h1>
+                    <p class="mt-2 text-lg text-white/70" data-lang-key="main_subtitle">Check your assigned tasks and test your knowledge.</p>
+                </div>
+                 <div class="flex items-center gap-4">
+                    <a href="dashboard_student.html" class="px-5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-semibold transition-colors flex-shrink-0" data-lang-key="back_to_dashboard">&larr; Back to Dashboard</a>
+                     <div class="lang-dropdown">
+                        <button class="lang-dropbtn">
+                            <span id="current-lang-text">EN</span> <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="lang-dropdown-content">
+                            <a href="#" data-lang="en">English</a>
+                            <a href="#" data-lang="hi">हिन्दी</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <section id="quizzes-section" class="mb-12">
+                <h2 class="font-title-pro text-3xl font-bold mb-4" data-lang-key="quizzes_section_title">Quizzes</h2>
+                <div id="quiz-list-container" class="space-y-4"></div>
+                <div id="quiz-empty-state" class="hidden text-center py-16 px-6 bg-white/5 rounded-2xl empty-state opacity-0">
+                     <svg class="mx-auto h-24 w-24 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    <h3 class="mt-4 text-xl font-semibold text-white" data-lang-key="no_quizzes_title">No quizzes for you till now</h3>
+                    <p class="mt-2 text-white/60" data-lang-key="no_quizzes_subtitle">Your lecturer hasn't assigned any quizzes yet.</p>
+                </div>
+            </section>
+            <section id="assignments-section">
+                <h2 class="font-title-pro text-3xl font-bold mb-4" data-lang-key="assignments_section_title">Assignments</h2>
+                <div id="assignment-list-container" class="space-y-4"></div>
+                <div id="assignment-empty-state" class="hidden text-center py-16 px-6 bg-white/5 rounded-2xl empty-state opacity-0">
+                    <svg class="mx-auto h-24 w-24 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                    <h3 class="mt-4 text-xl font-semibold text-white" data-lang-key="no_assignments_title">No assignments for you till now</h3>
+                     <p class="mt-2 text-white/60" data-lang-key="no_assignments_subtitle">Your lecturer hasn't assigned any homework yet.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             const translations = {
+                en: {
+                    doc_title: "Quizzes & Assignments",
+                    main_title: "Quizzes & Assignments",
+                    main_subtitle: "Check your assigned tasks and test your knowledge.",
+                    back_to_dashboard: "← Back to Dashboard",
+                    quizzes_section_title: "Quizzes",
+                    no_quizzes_title: "No quizzes for you till now",
+                    no_quizzes_subtitle: "Your lecturer hasn't assigned any quizzes yet.",
+                    assignments_section_title: "Assignments",
+                    no_assignments_title: "No assignments for you till now",
+                    no_assignments_subtitle: "Your lecturer hasn't assigned any homework yet.",
+                    posted_on: "Posted on",
+                    due_on: "Due:",
+                    marks: "Marks:",
+                    time: "Time:",
+                    mins: "mins",
+                    take_quiz: "Take Quiz",
+                    completed: "Completed",
+                    view_submit: "View & Submit",
+                    submitted: "Submitted",
+                    instructions: "Instructions",
+                    quiz_instruction_1: "This quiz contains",
+                    quiz_instruction_2: "questions.",
+                    quiz_instruction_3: "You will have",
+                    quiz_instruction_4: "minutes to complete the quiz.",
+                    quiz_instruction_5: "You can navigate back and forth between questions before finishing.",
+                    quiz_instruction_6: "Your score will be submitted automatically when time runs out or you finish.",
+                    ready_prompt: 'Click "Start Quiz" when you are ready to begin.',
+                    start_quiz_btn: "Start Quiz",
+                    back_btn: "Back",
+                    next_btn: "Next",
+                    finish_btn: "Finish",
+                    question_progress: "Question {x} of {y}",
+                    times_up: "Time's up! The quiz has been submitted.",
+                    quiz_complete_title: "Quiz Complete!",
+                    quiz_complete_subtitle: "You have completed the quiz. Your results will be submitted to your lecturer.",
+                    great_job: "Great Job!",
+                    close_btn: "Close",
+                    no_time_limit: "No Time Limit",
+                    posted_on: "Posted:",
+                    points: "Points:",
+                    your_work: "Your work",
+                    status_assigned: "Assigned",
+                    status_submitted: "Submitted",
+                    add_or_create: "Add or create",
+                    mark_as_done: "Mark as done",
+                    turn_in: "Turn in",
+                    submitted_feedback: "You've submitted this assignment."
+                },
+                hi: {
+                    doc_title: "क्विज़ और असाइनमेंट",
+                    main_title: "क्विज़ और असाइनमेंट",
+                    main_subtitle: "अपने सौंपे गए कार्यों की जाँच करें और अपने ज्ञान का परीक्षण करें।",
+                    back_to_dashboard: "← डैशबोर्ड पर वापस जाएं",
+                    quizzes_section_title: "क्विज़",
+                    no_quizzes_title: "अभी तक आपके लिए कोई क्विज़ नहीं है",
+                    no_quizzes_subtitle: "आपके व्याख्याता ने अभी तक कोई क्विज़ नहीं सौंपा है।",
+                    assignments_section_title: "असाइनमेंट",
+                    no_assignments_title: "अभी तक आपके लिए कोई असाइनमेंट नहीं है",
+                    no_assignments_subtitle: "आपके व्याख्याता ने अभी तक कोई होमवर्क नहीं सौंपा है।",
+                    posted_on: "को पोस्ट किया गया",
+                    due_on: "देय:",
+                    marks: "अंक:",
+                    time: "समय:",
+                    mins: "मिनट",
+                    take_quiz: "क्विज़ लें",
+                    completed: "पूर्ण",
+                    view_submit: "देखें और जमा करें",
+                    submitted: "जमा किया गया",
+                    instructions: "निर्देश",
+                    quiz_instruction_1: "इस क्विज़ में",
+                    quiz_instruction_2: "प्रश्न हैं।",
+                    quiz_instruction_3: "आपके पास",
+                    quiz_instruction_4: "मिनट होंगे।",
+                    quiz_instruction_5: "आप समाप्त करने से पहले प्रश्नों के बीच आगे और पीछे नेविगेट कर सकते हैं।",
+                    quiz_instruction_6: "समय समाप्त होने या आपके समाप्त करने पर आपका स्कोर स्वचालित रूप से जमा हो जाएगा।",
+                    ready_prompt: 'जब आप शुरू करने के लिए तैयार हों तो "क्विज़ शुरू करें" पर क्लिक करें।',
+                    start_quiz_btn: "क्विज़ शुरू करें",
+                    back_btn: "पीछे",
+                    next_btn: "अगला",
+                    finish_btn: "समाप्त",
+                    question_progress: "प्रश्न {x} का {y}",
+                    times_up: "समय समाप्त! क्विज़ जमा कर दिया गया है।",
+                    quiz_complete_title: "क्विज़ पूर्ण!",
+                    quiz_complete_subtitle: "आपने क्विज़ पूरा कर लिया है। आपके परिणाम आपके व्याख्याता को जमा कर दिए जाएंगे।",
+                    great_job: "बहुत बढ़िया!",
+                    close_btn: "बंद करें",
+                    no_time_limit: "कोई समय सीमा नहीं",
+                    posted_on: "पोस्ट किया गया:",
+                    points: "अंक:",
+                    your_work: "आपका काम",
+                    status_assigned: "सौंपा गया",
+                    status_submitted: "जमा किया गया",
+                    add_or_create: "जोड़ें या बनाएं",
+                    mark_as_done: "पूर्ण के रूप में चिह्नित करें",
+                    turn_in: "जमा करें",
+                    submitted_feedback: "आपने यह असाइनमेंट जमा कर दिया है।"
+                }
+            };
+            let currentLang = 'en';
+
+            localStorage.setItem('newQuizAssignmentCount', '0');
+            const modals = { quizTaker: document.getElementById('quiz-taker-modal'), viewAssignment: document.getElementById('view-assignment-modal') };
+            const quizListContainer = document.getElementById('quiz-list-container');
+            const assignmentListContainer = document.getElementById('assignment-list-container');
+            const quizEmptyState = document.getElementById('quiz-empty-state');
+            const assignmentEmptyState = document.getElementById('assignment-empty-state');
+            
+            let savedQuizzes = JSON.parse(localStorage.getItem('savedQuizzes')) || [];
+            let savedAssignments = JSON.parse(localStorage.getItem('savedAssignments')) || [];
+            let completedQuizzes = JSON.parse(localStorage.getItem('completedQuizzes')) || [];
+            let submittedAssignments = JSON.parse(localStorage.getItem('submittedAssignments')) || [];
+            let currentQuiz = null, currentQuestionIndex = 0, userAnswers = [], quizTimer = null, currentAssignment = null;
+
+            const langDropdown = document.querySelector('.lang-dropdown');
+            const dropdownButton = langDropdown.querySelector('.lang-dropbtn');
+            const dropdownLinks = document.querySelectorAll('.lang-dropdown-content a');
+            const currentLangText = document.getElementById('current-lang-text');
+
+            function setLanguage(lang) {
+                currentLang = lang;
+                localStorage.setItem('gyaanpath_lang', lang);
+                document.body.classList.toggle('hindi-lang', lang === 'hi');
+                document.title = translations[lang].doc_title;
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) el.textContent = translations[lang][key];
+                });
+                currentLangText.textContent = lang === 'en' ? 'EN' : 'HI';
+                langDropdown.classList.remove('active');
+                renderItems('quiz');
+                renderItems('assignment');
+            }
+
+            dropdownButton.addEventListener('click', (e) => { e.stopPropagation(); langDropdown.classList.toggle('active'); });
+            window.addEventListener('click', (e) => { if (!langDropdown.contains(e.target)) langDropdown.classList.remove('active'); });
+            dropdownLinks.forEach(link => {
+                link.addEventListener('click', (e) => { e.preventDefault(); setLanguage(link.getAttribute('data-lang')); });
+            });
+
+
+            function openModal(modal) { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content')?.classList.remove('opacity-0', 'scale-95'); }, 10); }
+            function closeModal(modal) { if(!modal) return; if (modal === modals.quizTaker) { clearInterval(quizTimer); } modal.classList.add('opacity-0'); modal.querySelector('.modal-content')?.classList.add('opacity-0', 'scale-95'); setTimeout(() => modal.classList.add('hidden'), 300); }
+            
+            function renderItems(type) {
+                const container = type === 'quiz' ? quizListContainer : assignmentListContainer;
+                const emptyState = type === 'quiz' ? quizEmptyState : assignmentEmptyState;
+                const items = type === 'quiz' ? savedQuizzes : savedAssignments;
+                
+                container.innerHTML = '';
+                if (items.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    setTimeout(() => emptyState.classList.remove('opacity-0'), 10);
+                } else {
+                    emptyState.classList.add('hidden', 'opacity-0');
+                    items.forEach((item, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'item-card rounded-2xl p-5';
+                        const date = new Date(item.date);
+                        const formattedDate = date.toLocaleDateString(currentLang === 'hi' ? 'hi-IN' : 'en-US');
+                        let buttonHtml;
+                        if(type === 'quiz') {
+                            const isCompleted = completedQuizzes.includes(item.date);
+                            buttonHtml = isCompleted ? `<button class="px-4 py-2 text-sm rounded-lg bg-green-600 cursor-not-allowed" disabled>${translations[currentLang].completed}</button>` : `<button data-type="quiz" data-index="${index}" class="action-btn px-4 py-2 text-sm rounded-lg bg-sky-500 hover:bg-sky-400 transition-colors">${translations[currentLang].take_quiz}</button>`;
+                        } else {
+                            const isSubmitted = submittedAssignments.includes(item.date);
+                            buttonHtml = isSubmitted ? `<button data-type="assignment" data-index="${index}" class="action-btn px-4 py-2 text-sm rounded-lg bg-green-600">${translations[currentLang].submitted}</button>` : `<button data-type="assignment" data-index="${index}" class="action-btn px-4 py-2 text-sm rounded-lg bg-blue-500 hover:bg-blue-400 transition-colors">${translations[currentLang].view_submit}</button>`;
+                        }
+
+                        card.innerHTML = `<div class="flex justify-between items-start"><div><h3 class="text-xl font-bold">${item.name}</h3><p class="text-sm text-white/60 mt-1">${translations[currentLang].posted_on} ${formattedDate}</p></div>${buttonHtml}</div>${type === 'quiz' ? `<div class="mt-4 pt-4 border-t border-white/20 text-sm text-white/80 flex justify-between"><span>${translations[currentLang].due_on} ${item.dueDate || 'N/A'}</span><span>${translations[currentLang].marks} ${item.marks || 'N/A'}</span><span>${translations[currentLang].time} ${item.time || 'N/A'} ${translations[currentLang].mins}</span></div>` : ''}`;
+                        container.appendChild(card);
+                    });
+                }
+            }
+
+            document.body.addEventListener('click', (e) => {
+                if (e.target.closest('.action-btn')) {
+                    const btn = e.target.closest('.action-btn');
+                    const type = btn.dataset.type;
+                    const index = parseInt(btn.dataset.index);
+                    if (type === 'quiz') { startQuiz(savedQuizzes[index]); } 
+                    else { viewAssignment(savedAssignments[index]); }
+                }
+                if (e.target.closest('.close-modal-btn')) { Object.values(modals).forEach(closeModal); }
+            });
+            function startQuiz(quizData) {
+                currentQuiz = { ...quizData, questions: parseQuizContent(quizData.content) };
+                currentQuestionIndex = 0;
+                userAnswers = new Array(currentQuiz.questions.length).fill(null);
+                document.getElementById('modal-quiz-title').textContent = currentQuiz.name;
+                showInstructions();
+                openModal(modals.quizTaker);
+            }
+            function showInstructions() {
+                const quizBody = document.getElementById('quiz-body');
+                const startBtn = document.getElementById('start-quiz-btn');
+                const quizNav = document.getElementById('quiz-navigation');
+                quizBody.innerHTML = `<div class="text-center"><h2 class="text-3xl font-bold text-gray-800 mb-4">${translations[currentLang].instructions}</h2><ul class="text-left max-w-md mx-auto space-y-2 text-gray-600 list-disc list-inside"><li>${translations[currentLang].quiz_instruction_1} <strong>${currentQuiz.questions.length} ${translations[currentLang].quiz_instruction_2}</strong></li><li>${translations[currentLang].quiz_instruction_3} <strong>${currentQuiz.time || 'unlimited'} ${translations[currentLang].quiz_instruction_4}</strong></li><li>${translations[currentLang].quiz_instruction_5}</li><li>${translations[currentLang].quiz_instruction_6}</li></ul><p class="mt-8 font-semibold">${translations[currentLang].ready_prompt}</p></div>`;
+                if(startBtn) startBtn.style.display = 'block';
+                if(quizNav) quizNav.style.display = 'none';
+                document.getElementById('quiz-timer').textContent = '';
+            }
+            const startQuizBtn = document.getElementById('start-quiz-btn');
+            if(startQuizBtn) {
+                startQuizBtn.addEventListener('click', () => {
+                    const quizNav = document.getElementById('quiz-navigation');
+                    startQuizBtn.style.display = 'none';
+                    if(quizNav) quizNav.style.display = 'flex';
+                    startTimer(currentQuiz.time);
+                    displayQuestion();
+                });
+            }
+            function startTimer(minutes) {
+                clearInterval(quizTimer);
+                const timerEl = document.getElementById('quiz-timer');
+                if (!minutes || isNaN(minutes)) { timerEl.textContent = translations[currentLang].no_time_limit; return; }
+                let seconds = minutes * 60;
+                quizTimer = setInterval(() => {
+                    seconds--;
+                    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                    const secs = (seconds % 60).toString().padStart(2, '0');
+                    timerEl.textContent = `${mins}:${secs}`;
+                    if (seconds <= 0) {
+                        clearInterval(quizTimer);
+                        timerEl.textContent = "00:00";
+                        alert(translations[currentLang].times_up);
+                        displayQuizResults();
+                    }
+                }, 1000);
+            }
+            function displayQuestion() {
+                const quizBody = document.getElementById('quiz-body');
+                const quizProgress = document.getElementById('quiz-progress');
+                const nextBtn = document.getElementById('next-question-btn');
+                const backBtn = document.getElementById('back-question-btn');
+                if (currentQuestionIndex >= currentQuiz.questions.length) { displayQuizResults(); return; }
+                if(backBtn) backBtn.style.visibility = currentQuestionIndex === 0 ? 'hidden' : 'visible';
+                const question = currentQuiz.questions[currentQuestionIndex];
+                quizBody.innerHTML = `<h3 class="text-2xl font-bold mb-6">${question.question}</h3><div class="space-y-4">${question.options.map((opt, i) => `<div class="quiz-option p-4 rounded-lg cursor-pointer" data-index="${i}">${opt}</div>`).join('')}</div>`;
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    quizBody.querySelector(`.quiz-option[data-index="${userAnswers[currentQuestionIndex]}"]`).classList.add('selected');
+                }
+                quizProgress.textContent = translations[currentLang].question_progress.replace('{x}', currentQuestionIndex + 1).replace('{y}', currentQuiz.questions.length);
+                nextBtn.textContent = (currentQuestionIndex === currentQuiz.questions.length - 1) ? translations[currentLang].finish_btn : translations[currentLang].next_btn;
+            }
+            function displayQuizResults() {
+                clearInterval(quizTimer);
+                document.getElementById('quiz-footer').style.display = 'none';
+                document.getElementById('quiz-body').innerHTML = `<div class="text-center"><h2 class="text-3xl font-bold text-gray-800">${translations[currentLang].quiz_complete_title}</h2><p class="mt-4 text-lg text-gray-600">${translations[currentLang].quiz_complete_subtitle}</p><p class="mt-8 text-5xl font-bold text-purple-600">${translations[currentLang].great_job}</p><button id="finish-quiz-btn" class="mt-8 px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold">${translations[currentLang].close_btn}</button></div>`;
+                document.getElementById('finish-quiz-btn').addEventListener('click', () => {
+                    if (!completedQuizzes.includes(currentQuiz.date)) {
+                        completedQuizzes.push(currentQuiz.date);
+                        localStorage.setItem('completedQuizzes', JSON.stringify(completedQuizzes));
+                    }
+                    closeModal(modals.quizTaker);
+                    renderItems('quiz');
+                });
+            }
+            document.getElementById('quiz-body').addEventListener('click', e => { if(e.target.classList.contains('quiz-option')) { document.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected')); e.target.classList.add('selected'); } });
+            document.getElementById('next-question-btn').addEventListener('click', () => {
+                const selectedOption = document.querySelector('.quiz-option.selected');
+                if (selectedOption) { userAnswers[currentQuestionIndex] = selectedOption.dataset.index; } 
+                else { userAnswers[currentQuestionIndex] = null; }
+                currentQuestionIndex++;
+                displayQuestion();
+            });
+            document.getElementById('back-question-btn').addEventListener('click', () => {
+                if (currentQuestionIndex > 0) {
+                    const selectedOption = document.querySelector('.quiz-option.selected');
+                    if(selectedOption) { userAnswers[currentQuestionIndex] = selectedOption.dataset.index; }
+                    currentQuestionIndex--;
+                    displayQuestion();
+                }
+            });
+            
+            function viewAssignment(assignment) {
+                currentAssignment = assignment;
+                const modal = modals.viewAssignment;
+                document.getElementById('modal-assignment-title').textContent = assignment.name;
+                document.getElementById('modal-assignment-content').innerHTML = formatAssignmentContent(assignment.content);
+                document.getElementById('modal-assignment-points').textContent = assignment.points || 'N/A';
+                document.getElementById('modal-assignment-date').textContent = new Date(assignment.date).toLocaleDateString();
+                updateSubmissionUI(assignment);
+                openModal(modal);
+            }
+            const addWorkBtn = document.getElementById('add-work-btn');
+            const fileInput = document.getElementById('file-input');
+            const turnInBtn = document.getElementById('turn-in-btn');
+            const fileUploadArea = document.getElementById('file-upload-area');
+
+            if(addWorkBtn) addWorkBtn.addEventListener('click', () => fileInput.click());
+            if(fileInput) fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    fileUploadArea.innerHTML = `<div class="flex items-center justify-between p-2 bg-gray-200 rounded-lg border"><span class="text-sm text-gray-700 truncate">${file.name}</span><button id="remove-file-btn" class="text-gray-500 hover:text-red-500">&times;</button></div>`;
+                    turnInBtn.disabled = false;
+                    turnInBtn.classList.replace('bg-gray-300', 'bg-purple-600');
+                    turnInBtn.classList.replace('text-gray-500', 'text-white');
+                    turnInBtn.classList.replace('cursor-not-allowed', 'hover:bg-purple-700');
+                    turnInBtn.textContent = translations[currentLang].turn_in;
+                }
+            });
+            if(fileUploadArea) fileUploadArea.addEventListener('click', (e) => {
+                if (e.target.id === 'remove-file-btn') {
+                    fileInput.value = '';
+                    updateSubmissionUI(currentAssignment);
+                }
+            });
+            if (turnInBtn) turnInBtn.addEventListener('click', () => {
+                if (!submittedAssignments.includes(currentAssignment.date)) {
+                    submittedAssignments.push(currentAssignment.date);
+                    localStorage.setItem('submittedAssignments', JSON.stringify(submittedAssignments));
+                    let count = parseInt(localStorage.getItem('assignmentSubmissionCount') || '0');
+                    localStorage.setItem('assignmentSubmissionCount', ++count);
+                    updateSubmissionUI(currentAssignment);
+                    renderItems('assignment');
+                }
+            });
+            function updateSubmissionUI(assignment) {
+                const isSubmitted = submittedAssignments.includes(assignment.date);
+                const statusText = document.getElementById('assignment-status-text');
+                statusText.textContent = isSubmitted ? translations[currentLang].status_submitted : translations[currentLang].status_assigned;
+                statusText.className = `text-sm font-semibold ${isSubmitted ? 'text-green-600' : 'text-gray-500'}`;
+                addWorkBtn.style.display = isSubmitted ? 'none' : 'flex';
+                turnInBtn.style.display = 'block';
+                if (isSubmitted) {
+                    fileUploadArea.innerHTML = `<div class="p-2 text-center text-sm text-green-700">${translations[currentLang].submitted_feedback}</div>`;
+                    turnInBtn.className = 'w-full mt-2 py-2 px-4 rounded-lg bg-green-600 text-white font-semibold cursor-not-allowed';
+                    turnInBtn.textContent = translations[currentLang].submitted;
+                    turnInBtn.disabled = true;
+                } else {
+                    fileUploadArea.innerHTML = '';
+                    fileInput.value = '';
+                    turnInBtn.disabled = true;
+                    turnInBtn.className = 'w-full mt-2 py-2 px-4 rounded-lg bg-gray-300 text-gray-500 font-semibold cursor-not-allowed';
+                    turnInBtn.textContent = translations[currentLang].mark_as_done;
+                }
+            }
+
+            function parseQuizContent(text) {
+                let cleanText = text.replace(/^(here is|sure, here's|certainly, here's|here's).*?:?\s*\n*/im, '').replace(/\*\*(.*?)\*\*/g, '$1').replace(/^.*(quiz|questions).*\n/im, '').replace(/^-{2,}\n/gm, '');
+                const questionBlocks = cleanText.split(/\n(?=\d+\.)/).filter(q => q.trim() !== '');
+                return questionBlocks.map(block => {
+                    const lines = block.split('\n').filter(line => line.trim() !== '');
+                    const question = lines.shift().replace(/^\d+\.\s*/, '').trim();
+                    const options = lines.map(line => line.replace(/^[a-zA-Z][.)]\s*/, '').trim());
+                    return { question, options };
+                });
+            }
+            function formatAssignmentContent(text) {
+                let cleanText = text.replace(/^(here is|sure, here's|certainly, here's|here's).*?:?\s*\n*/im, '');
+                return cleanText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-lg text-gray-900">$1</strong>').replace(/\n/g, '<br><br>');
+            }
+            const savedLang = localStorage.getItem('gyaanpath_lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Polls</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a0537; 
+            background-image: linear-gradient(to bottom right, #4a00e0, #1a0537);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #ffffff;
+        }
+        body.hindi-lang { font-family: 'Noto Sans Devanagari', sans-serif; }
+        .font-title-pro { font-family: 'Montserrat', sans-serif; }
+        body.hindi-lang .font-title-pro { font-family: 'Noto Sans Devanagari', sans-serif; font-weight: 700; }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+        #empty-state { transition: opacity 0.5s ease; }
+
+        .poll-option-bar {
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+        .poll-option-fill {
+            background-color: #a855f7;
+            height: 100%;
+            transition: width 0.5s ease-in-out;
+        }
+        .poll-option-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+        .vote-option {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #d1d5db;
+        }
+        .vote-option:hover {
+            background-color: #f3e8ff;
+            border-color: #a855f7;
+        }
+        .background-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .circuit-line {
+            position: absolute;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 1.5;
+            fill: none;
+            stroke-dasharray: 10 20;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash { to { stroke-dashoffset: 1000; } }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 5s infinite ease-in-out;
+        }
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+
+        /* Language Dropdown */
+        .lang-dropdown { position: relative; display: inline-block; }
+        .lang-dropbtn { background: transparent; border: 1px solid rgba(255, 255, 255, 0.5); color: #fff; padding: 0.4rem 0.8rem; border-radius: 15px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; }
+        .lang-dropbtn:hover { background: rgba(255, 255, 255, 0.2); }
+        .lang-dropbtn .fa-chevron-down { font-size: 0.7rem; transition: transform 0.3s ease; }
+        .lang-dropdown.active .lang-dropbtn .fa-chevron-down { transform: rotate(180deg); }
+        .lang-dropdown-content { display: none; position: absolute; background-color: rgba(20, 20, 30, 0.9); backdrop-filter: blur(5px); min-width: 110px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 50; border-radius: 10px; overflow: hidden; right: 0; margin-top: 8px; }
+        .lang-dropdown-content a { color: #fff; padding: 10px 14px; text-decoration: none; display: block; font-size: 0.9rem; transition: background-color 0.2s; }
+        body.hindi-lang .lang-dropdown-content a { font-family: 'Noto Sans Devanagari', sans-serif; }
+        .lang-dropdown-content a:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .lang-dropdown.active .lang-dropdown-content { display: block; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="background-wrapper">
+        <svg width="100%" height="100%"><path class="circuit-line" d="M -100 200 Q 200 100 400 300 T 800 250 T 1200 400 T 1600 300 T 2000 500"></path><path class="circuit-line" d="M 2000 100 Q 1600 200 1400 50 T 1000 150 T 600 0 T 200 200 T -100 100"></path></svg>
+        <script>
+            const bg = document.querySelector('.background-wrapper');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`; star.style.height = `${size}px`;
+                star.style.top = `${Math.random() * 100}%`; star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                bg.appendChild(star);
+            }
+        </script>
+    </div>
+    <!-- Voting/Results Modal -->
+    <div id="poll-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden modal-overlay opacity-0">
+        <div class="bg-slate-100 rounded-2xl shadow-xl w-full max-w-lg modal-content transform scale-95 opacity-0 flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b border-gray-200 bg-gradient-to-r from-purple-500 to-pink-500 rounded-t-2xl">
+                <div class="flex justify-between items-center">
+                    <h2 id="modal-title" class="text-2xl font-bold text-white">Poll</h2>
+                    <button class="close-modal-btn text-white/70 hover:text-white text-4xl leading-none">&times;</button>
+                </div>
+            </div>
+            <div class="p-6 overflow-y-auto text-gray-800">
+                <h3 id="modal-poll-question" class="text-xl font-bold mb-4"></h3>
+                <div id="modal-poll-options" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Content -->
+    <div class="min-h-screen p-4 sm:p-6 lg:p-8">
+        <div class="w-full max-w-4xl mx-auto">
+            <header class="flex items-center justify-between mb-10">
+                <div>
+                    <h1 class="font-title-pro text-4xl font-bold tracking-wide" data-lang-key="main_title">Live Polls</h1>
+                    <p class="mt-2 text-lg text-white/70" data-lang-key="main_subtitle">Participate in real-time polls from your class.</p>
+                </div>
+                 <div class="flex items-center gap-4">
+                    <a href="dashboard_student.html" class="px-5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-semibold transition-colors flex-shrink-0" data-lang-key="back_to_dashboard">&larr; Back to Dashboard</a>
+                    <div class="lang-dropdown">
+                        <button class="lang-dropbtn">
+                            <span id="current-lang-text">EN</span> <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="lang-dropdown-content">
+                            <a href="#" data-lang="en">English</a>
+                            <a href="#" data-lang="hi">हिन्दी</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div id="poll-list-container" class="space-y-4"></div>
+            <div id="empty-state" class="hidden text-center py-16 px-6 bg-white/5 rounded-2xl opacity-0">
+                 <svg class="mx-auto h-24 w-24 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" /></svg>
+                <h3 class="mt-4 text-xl font-semibold text-white" data-lang-key="empty_title">No live polls for you till now</h3>
+                <p class="mt-2 text-white/60" data-lang-key="empty_subtitle">Your lecturer hasn't started any polls yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const translations = {
+                en: {
+                    doc_title: "Live Polls",
+                    main_title: "Live Polls",
+                    main_subtitle: "Participate in real-time polls from your class.",
+                    back_to_dashboard: "← Back to Dashboard",
+                    empty_title: "No live polls for you till now",
+                    empty_subtitle: "Your lecturer hasn't started any polls yet.",
+                    created_on: "Created on",
+                    vote_now: "Vote Now",
+                    view_results: "View Results",
+                    modal_title_results: "Poll Results",
+                    modal_title_vote: "Cast Your Vote",
+                    your_vote: "(Your Vote)",
+                    votes_text: "vote(s)",
+                    change_vote: "Change Your Vote"
+                },
+                hi: {
+                    doc_title: "लाइव पोल",
+                    main_title: "लाइव पोल",
+                    main_subtitle: "अपनी कक्षा से वास्तविक समय के पोल में भाग लें।",
+                    back_to_dashboard: "← डैशबोर्ड पर वापस जाएं",
+                    empty_title: "अभी तक आपके लिए कोई लाइव पोल नहीं है",
+                    empty_subtitle: "आपके व्याख्याता ने अभी तक कोई पोल शुरू नहीं किया है।",
+                    created_on: "को बनाया गया",
+                    vote_now: "अभी वोट दें",
+                    view_results: "परिणाम देखें",
+                    modal_title_results: "पोल के परिणाम",
+                    modal_title_vote: "अपना वोट डालें",
+                    your_vote: "(आपका वोट)",
+                    votes_text: "वोट",
+                    change_vote: "अपना वोट बदलें"
+                }
+            };
+            let currentLang = 'en';
+            localStorage.setItem('newPollCount', '0');
+
+            const pollModal = document.getElementById('poll-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const closeModalBtns = document.querySelectorAll('.close-modal-btn');
+            const pollListContainer = document.getElementById('poll-list-container');
+            const emptyState = document.getElementById('empty-state');
+            const modalPollQuestion = document.getElementById('modal-poll-question');
+            const modalPollOptions = document.getElementById('modal-poll-options');
+            
+            let livePolls = [];
+            let studentVotes = {};
+            const langDropdown = document.querySelector('.lang-dropdown');
+            const dropdownButton = langDropdown.querySelector('.lang-dropbtn');
+            const dropdownLinks = document.querySelectorAll('.lang-dropdown-content a');
+            const currentLangText = document.getElementById('current-lang-text');
+
+             function setLanguage(lang) {
+                currentLang = lang;
+                localStorage.setItem('gyaanpath_lang', lang);
+                document.body.classList.toggle('hindi-lang', lang === 'hi');
+                document.title = translations[lang].doc_title;
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) el.textContent = translations[lang][key];
+                });
+                currentLangText.textContent = lang === 'en' ? 'EN' : 'HI';
+                langDropdown.classList.remove('active');
+                renderPolls();
+            }
+
+            dropdownButton.addEventListener('click', (e) => { e.stopPropagation(); langDropdown.classList.toggle('active'); });
+            window.addEventListener('click', (e) => { if (!langDropdown.contains(e.target)) langDropdown.classList.remove('active'); });
+            dropdownLinks.forEach(link => {
+                link.addEventListener('click', (e) => { e.preventDefault(); setLanguage(link.getAttribute('data-lang')); });
+            });
+
+            const openModal = () => { pollModal.classList.remove('hidden'); setTimeout(() => { pollModal.classList.remove('opacity-0'); pollModal.querySelector('.modal-content')?.classList.remove('opacity-0', 'scale-95'); }, 10); };
+            const closeModal = () => { pollModal.classList.add('opacity-0'); pollModal.querySelector('.modal-content')?.classList.add('opacity-0', 'scale-95'); setTimeout(() => pollModal.classList.add('hidden'), 300); };
+            closeModalBtns.forEach(btn => btn.addEventListener('click', closeModal));
+
+            function renderPolls() {
+                pollListContainer.innerHTML = '';
+                livePolls = JSON.parse(localStorage.getItem('livePolls')) || [];
+                studentVotes = JSON.parse(localStorage.getItem('studentVotes')) || {};
+
+                if (livePolls.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    setTimeout(() => emptyState.classList.remove('opacity-0'), 10);
+                } else {
+                    emptyState.classList.add('hidden', 'opacity-0');
+                    livePolls.forEach((poll, index) => {
+                        const pollCard = document.createElement('div');
+                        pollCard.className = 'card rounded-2xl p-5 flex justify-between items-center';
+                        const date = new Date(poll.date);
+                        const formattedDate = date.toLocaleDateString(currentLang === 'hi' ? 'hi-IN' : 'en-US');
+                        const hasVoted = studentVotes[poll.id] !== undefined;
+                        const buttonText = hasVoted ? translations[currentLang].view_results : translations[currentLang].vote_now;
+                        pollCard.innerHTML = `<div><h3 class="text-xl font-bold flex items-center">${poll.question}</h3><p class="text-sm text-white/60 mt-1">${translations[currentLang].created_on} ${formattedDate}</p></div><button data-index="${index}" class="action-btn px-4 py-2 text-sm rounded-lg ${hasVoted ? 'bg-gray-500' : 'bg-sky-500 hover:bg-sky-400'}">${buttonText}</button>`;
+                        pollListContainer.appendChild(pollCard);
+                    });
+                }
+            }
+
+            function showPoll(pollIndex) {
+                const poll = livePolls[pollIndex];
+                if (!poll) return;
+                modalPollQuestion.textContent = poll.question;
+                const hasVoted = studentVotes[poll.id] !== undefined;
+                if (hasVoted) {
+                    modalTitle.textContent = translations[currentLang].modal_title_results;
+                    renderPollResults(poll, pollIndex);
+                } else {
+                    modalTitle.textContent = translations[currentLang].modal_title_vote;
+                    renderVotingOptions(poll, pollIndex);
+                }
+                openModal();
+            }
+
+            function renderVotingOptions(poll, pollIndex) {
+                modalPollOptions.innerHTML = '';
+                poll.options.forEach((option, optionIndex) => {
+                    const optionEl = document.createElement('div');
+                    optionEl.className = 'vote-option p-3 rounded-lg bg-white shadow';
+                    optionEl.textContent = option.text;
+                    optionEl.dataset.pollIndex = pollIndex;
+                    optionEl.dataset.optionIndex = optionIndex;
+                    modalPollOptions.appendChild(optionEl);
+                });
+            }
+
+            function renderPollResults(poll, pollIndex) {
+                modalPollOptions.innerHTML = '';
+                const totalVotes = poll.options.reduce((sum, option) => sum + option.votes, 0);
+                poll.options.forEach((option, optionIndex) => {
+                    const percentage = totalVotes === 0 ? 0 : Math.round((option.votes / totalVotes) * 100);
+                    const isVotedOption = studentVotes[poll.id] === optionIndex;
+                    const resultEl = document.createElement('div');
+                    resultEl.className = 'space-y-2';
+                    resultEl.innerHTML = `<div class="poll-option-bar h-10"><div class="poll-option-fill" style="width: ${percentage}%;"></div><div class="poll-option-text text-gray-800 font-semibold"><span>${option.text} ${isVotedOption ? translations[currentLang].your_vote : ''}</span><span class="text-sm">${percentage}%</span></div></div><div class="text-right text-xs text-gray-500"><span>${option.votes} ${translations[currentLang].votes_text}</span></div>`;
+                    modalPollOptions.appendChild(resultEl);
+                });
+                const changeVoteBtn = document.createElement('button');
+                changeVoteBtn.textContent = translations[currentLang].change_vote;
+                changeVoteBtn.className = 'mt-4 w-full text-sm py-2 px-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors';
+                changeVoteBtn.dataset.pollIndex = pollIndex;
+                changeVoteBtn.onclick = () => { renderVotingOptions(poll, pollIndex); };
+                modalPollOptions.appendChild(changeVoteBtn);
+            }
+
+            pollListContainer.addEventListener('click', (e) => { if (e.target.classList.contains('action-btn')) { showPoll(e.target.dataset.index); } });
+            modalPollOptions.addEventListener('click', (e) => {
+                if (e.target.classList.contains('vote-option')) {
+                    const pollIndex = e.target.dataset.pollIndex;
+                    const optionIndex = parseInt(e.target.dataset.optionIndex);
+                    const pollId = livePolls[pollIndex].id;
+                    if (studentVotes[pollId] !== undefined) {
+                        const previousVoteIndex = studentVotes[pollId];
+                        livePolls[pollIndex].options[previousVoteIndex].votes--;
+                    }
+                    livePolls[pollIndex].options[optionIndex].votes++;
+                    localStorage.setItem('livePolls', JSON.stringify(livePolls));
+                    studentVotes[pollId] = optionIndex;
+                    localStorage.setItem('studentVotes', JSON.stringify(studentVotes));
+                    renderPolls();
+                    showPoll(pollIndex);
+                }
+            });
+            
+            const savedLang = localStorage.getItem('gyaanpath_lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</body>
+</html>
+
+
+
